@@ -28,6 +28,7 @@ services:
     volumes:
       - ./ssmtp/ssmtp.conf:/etc/ssmtp/ssmtp.conf:ro
       - ./html:/usr/share/nginx/html:ro
+      - ./groups:/home:ro
 
   mariadb:
     image: mariadb
