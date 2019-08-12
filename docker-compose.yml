@@ -20,6 +20,7 @@ services:
 
   php:
     build: .
+    restart: unless-stopped
     networks:
       - backend
     labels:
