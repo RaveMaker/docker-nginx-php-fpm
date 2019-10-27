@@ -1,5 +1,5 @@
 # Docker: Nginx with PHP support
-Dockerfile for PHP with sSMTP client.
+Dockerfile for PHP with mSMTP client.
 
 docker-compose file includes:
  - Nginx
@@ -11,7 +11,7 @@ docker-compose file includes:
 ## Setup
 1. clone the repo
 2. edit .env file
-3. create ssmtp/ssmtp.conf from provided ssmtp.conf.example
+3. create msmtp/msmtprc from provided msmtprc.example
 
 ## Network settings:
 The stack is divided into two networks, backend and frontend.
