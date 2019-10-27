@@ -26,7 +26,7 @@ services:
     labels:
       - "traefik.enable=false"
     volumes:
-      - ./ssmtp/ssmtp.conf:/etc/ssmtp/ssmtp.conf:ro
+      - ./msmtp/msmtprc:/etc/msmtprc
       - ./html:/usr/share/nginx/html:ro
 
   mariadb:
