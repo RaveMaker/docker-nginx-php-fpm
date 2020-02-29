@@ -3,7 +3,7 @@ version: '3.7'
 services:
   web:
     image: nginx:alpine
-    restart: unless-stopped
+    restart: always
     labels:
       - "traefik.backend=${podName}-web"
       - "traefik.frontend.rule=Host:${hostRule}"
@@ -20,7 +20,7 @@ services:
 
   php:
     build: .
-    restart: unless-stopped
+    restart: always
     networks:
       - backend
     labels:
@@ -31,7 +31,7 @@ services:
 
   mariadb:
     image: mariadb
-    restart: unless-stopped
+    restart: always
     networks:
       - backend
     labels:
@@ -48,7 +48,7 @@ services:
     image: zeenlym/mariadb-backup
     depends_on:
       - mariadb
-    restart: unless-stopped
+    restart: always
     networks:
       - backend
     labels:
@@ -66,7 +66,7 @@ services:
 
   adminer:
     image: adminer
-    restart: unless-stopped
+    restart: always
     depends_on:
       - mariadb
     networks:
