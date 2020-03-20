@@ -20,6 +20,7 @@ services:
 
   php:
     build: .
+    image: ${podName}/php
     restart: always
     networks:
       - backend
