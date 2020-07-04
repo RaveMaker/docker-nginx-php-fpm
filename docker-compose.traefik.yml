@@ -1,0 +1,93 @@
+version: '3.7'
+
+services:
+  web:
+    image: nginx:alpine
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${podName}.rule=Host(`${hostRule}`)
+      - traefik.http.routers.${podName}.entrypoints=websecure
+      - traefik.http.services.${podName}.loadbalancer.server.port=80
+      - traefik.docker.network=${podName}_frontend
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d:ro
+      - ./html:/usr/share/nginx/html:ro
+    command: [nginx, '-g', 'daemon off;']
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.${podName}.rule=Host(`${hostRule}`)
+        - traefik.http.routers.${podName}.entrypoints=websecure
+        - traefik.http.services.${podName}.loadbalancer.server.port=80
+        - traefik.docker.network=${podName}_frontend
+
+  php:
+    build: .
+    image: ${podName}-php
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == worker]
+
+  mariadb:
+    image: mariadb
+    restart: always
+    networks:
+      - backend
+    environment:
+      MYSQL_DATABASE: ${dbName}
+      MYSQL_USER: ${dbUser}
+      MYSQL_PASSWORD: ${dbPass}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - ./database:/var/lib/mysql
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == worker]
+
+  backup:
+    image: zeenlym/mariadb-backup
+    depends_on:
+      - mariadb
+    restart: always
+    networks:
+      - backend
+    environment:
+      - TIMEZONE=${timeZone}
+      - SCHEDULE=0 0 3 * *
+      - BACKUP_METHOD=mysqldump
+      - MYSQL_HOST=mariadb
+      - MYSQL_DATABASE=${dbName}
+      - MYSQL_USER=${dbUser}
+      - MYSQL_PASSWORD=${dbPass}
+    volumes:
+      - ./backup:/backup
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == worker]
+
+networks:
+  frontend:
+  backend:
